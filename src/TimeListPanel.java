@@ -8,6 +8,7 @@ public class TimeListPanel<T> extends JPanel
     public TimeListPanel(T[] timeArray, String labelText)
     {
         super.setLayout(new BorderLayout());
+        super.setBackground(new Color(0,0,0,0));
 
         timeList = new JComboBox<>(timeArray);
         JLabel timeListLabel = new JLabel(labelText);

@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 public class TimerWindow extends JFrame
@@ -13,7 +14,7 @@ public class TimerWindow extends JFrame
     public TimerWindow()
     {
         super.setTitle("Timer");
-        super.setPreferredSize(new Dimension(250,200));
+        super.setPreferredSize(new Dimension(250,240));
         super.setLayout(new BorderLayout());
         super.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -23,11 +24,14 @@ public class TimerWindow extends JFrame
 
     public void createGui()
     {
+        AtomicReference<String> fileName= new AtomicReference<>("");
+
         TimeListPanel<Integer> hoursListPanel = new TimeListPanel<>(hoursArray, "HRS:");
         TimeListPanel<Integer> minutesListPanel = new TimeListPanel<>(minutesArray, "MIN:");
         TimeListPanel<Integer> secondsListPanel = new TimeListPanel<>(secondsArray, "SEC:");
 
         JPanel comboBoxPanel = new JPanel();
+        comboBoxPanel.setBackground(new Color(205,205,205));
         comboBoxPanel.setLayout(new FlowLayout());
         comboBoxPanel.add(hoursListPanel, FlowLayout.LEFT);
         comboBoxPanel.add(minutesListPanel, FlowLayout.CENTER);
@@ -94,17 +98,51 @@ public class TimerWindow extends JFrame
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.setBackground(new Color(0,0,0,0));
 
         buttonPanel.add(startButton);
         buttonPanel.add(stopButton);
         buttonPanel.add(resetButton);
 
-        JPanel mainPanel2 = new JPanel();
+        JPanel mainPanel2 = new JPanel()
+        {
+            public void paintComponent(Graphics g)
+            {
+                if(!fileName.toString().equals(""))
+                {
+                    ImageIcon imageIcon = new ImageIcon(fileName.toString());
+                    Image image = imageIcon.getImage();
+
+                    g.drawImage(new ImageIcon(image.getScaledInstance(super.getWidth(), super.getHeight(),  java.awt.Image.SCALE_SMOOTH)).getImage(), 0, 0, null);
+                }
+                else
+                {
+                    super.paintComponent(g);
+                }
+            }
+        };
+
         mainPanel2.setLayout(new FlowLayout());
         mainPanel2.add(timeLabel);
         mainPanel2.add(buttonPanel);
         mainPanel2.add(endLabel);
 
+        JMenuItem jMenuItem = new JMenuItem("Set background image");
+        jMenuItem.setFont(new Font("", Font.BOLD, 10));
+        jMenuItem.addActionListener((event)->
+        {
+            JFileChooser fileChooser = new JFileChooser();
+            if(fileChooser.showOpenDialog(null)==JFileChooser.APPROVE_OPTION)
+            {
+                fileName.set(fileChooser.getSelectedFile().getAbsolutePath());
+                mainPanel2.repaint();
+            }
+        });
+
+        JMenuBar jMenuBar = new JMenuBar();
+        jMenuBar.add(jMenuItem);
+
+        super.setJMenuBar(jMenuBar);
         super.add(mainPanel1, BorderLayout.PAGE_START);
         super.add(mainPanel2, BorderLayout.CENTER);
 
