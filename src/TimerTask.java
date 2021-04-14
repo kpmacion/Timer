@@ -3,28 +3,32 @@ import java.util.concurrent.TimeUnit;
 
 public class TimerTask implements Runnable
 {
-    private static Thread timerThread = null;
+    private static Thread timerThread;
+    static boolean isWaiting = false;
+
     private long secondsCounter;
 
     int hh = 0;
     int mm = 0;
     int ss = 0;
 
-    JLabel label;
-    StringBuilder time = new StringBuilder();
+    JLabel timeLabel;
+    JLabel endLabel;
+    StringBuilder timeString = new StringBuilder();
 
-    private TimerTask(int hours, int minutes, int seconds, JLabel label)
+    private TimerTask(int hours, int minutes, int seconds, JLabel timeLabel, JLabel endLabel)
     {
-        this.label = label;
+        this.timeLabel = timeLabel;
+        this.endLabel = endLabel;
         this.secondsCounter = (long) (hours*Math.pow(60,2) + minutes * 60L + seconds);
     }
 
-    public static Thread createSingleTask(int hours, int minutes, int seconds, JLabel label)
+    public static Thread createSingleTask(int hours, int minutes, int seconds, JLabel timeLabel, JLabel endLabel)
     {
         if(TimerTask.timerThread==null)
         {
-           TimerTask.timerThread = new Thread(new TimerTask(hours, minutes, seconds, label));
-           TimerTask.timerThread.start();
+           TimerTask.timerThread = new Thread(new TimerTask(hours, minutes, seconds, timeLabel, endLabel));
+           timerThread.start();
         }
         return TimerTask.timerThread;
     }
@@ -36,36 +40,38 @@ public class TimerTask implements Runnable
         {
             try
             {
-                hh = (int)(secondsCounter/Math.pow(60,2));
-                mm = (int)((secondsCounter - hh*Math.pow(60,2))/60);
-                ss = (int)((secondsCounter - hh*Math.pow(60,2))-mm*60);
-
-                time.setLength(0);
-                time.append((hh<10)?"0"+hh:hh)
-                        .append(":")
-                        .append((mm<10)?"0"+mm:mm)
-                        .append(":")
-                        .append((ss<10)?"0"+ss:ss);
-
-                label.setText(time.toString());
-
-                if(secondsCounter == 0)
+                if(!isWaiting)
                 {
-                    Thread.currentThread().interrupt();
-                }
-                else
-                {
+                    hh = (int)(secondsCounter/Math.pow(60,2));
+                    mm = (int)((secondsCounter - hh*Math.pow(60,2))/60);
+                    ss = (int)((secondsCounter - hh*Math.pow(60,2))-mm*60);
+
+                    timeString.setLength(0);
+                    timeString.append((hh<10)?"0"+hh:hh)
+                            .append(":")
+                            .append((mm<10)?"0"+mm:mm)
+                            .append(":")
+                            .append((ss<10)?"0"+ss:ss);
+
+                    timeLabel.setText(timeString.toString());
+
                     TimeUnit.SECONDS.sleep(1);
+                    if(secondsCounter == 0)
+                    {
+                        timerThread = null;
+                        timeLabel.setText("00:00:00");
+                        endLabel.setText(TimerState.FINISH.stateDescrition);
+                        Thread.currentThread().interrupt();
+                    }
                     secondsCounter--;
                 }
             }
             catch (InterruptedException e)
             {
-                timerThread=null;
-                label.setText("00:00:00");
+                timerThread = null;
+                timeLabel.setText("00:00:00");
                 return;
             }
         }
-        timerThread=null;
     }
 }

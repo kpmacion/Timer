@@ -13,10 +13,9 @@ public class TimerWindow extends JFrame
     public TimerWindow()
     {
         super.setTitle("Timer");
-        super.setPreferredSize(new Dimension(250,220));
+        super.setPreferredSize(new Dimension(250,200));
+        super.setLayout(new BorderLayout());
         super.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        super.setLayout(new GridLayout(2,1));
 
         super.setResizable(false);
         super.setVisible(true);
@@ -35,41 +34,61 @@ public class TimerWindow extends JFrame
         comboBoxPanel.add(secondsListPanel, FlowLayout.RIGHT);
 
         JPanel mainPanel1=new JPanel();
-        mainPanel1.setLayout(new GridLayout(2,1));
-
+        mainPanel1.setLayout(new BorderLayout());
         mainPanel1.add(comboBoxPanel, BorderLayout.CENTER);
         mainPanel1.add(new JSeparator(), BorderLayout.PAGE_END);
 
         JLabel timeLabel = new JLabel();
-        timeLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        timeLabel.setVerticalAlignment(SwingConstants.CENTER);
-
         timeLabel.setText("HH:MM:SS");
         timeLabel.setFont(new Font("", Font.BOLD, 30));
-
         timeLabel.setBackground(Color.white);
         timeLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         timeLabel.setOpaque(true);
 
+        JLabel endLabel = new JLabel();
+        endLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        endLabel.setPreferredSize(new Dimension(this.getPreferredSize().width, 20));
+        endLabel.setBackground(new Color(140, 180, 255));
+        endLabel.setFont(new Font("", Font.BOLD,16));
+        endLabel.setOpaque(true);
+
         JButton startButton = new JButton("Start");
         startButton.setBackground(new Color(154, 255, 154));
-
-        startButton.addActionListener((e)->
+        startButton.addActionListener((event)->
         {
-            if(hoursListPanel.timeList.getItemAt(hoursListPanel.timeList.getSelectedIndex())!=0 || minutesListPanel.timeList.getItemAt(minutesListPanel.timeList.getSelectedIndex())!=0 || secondsListPanel.timeList.getItemAt(secondsListPanel.timeList.getSelectedIndex())!=0)
+            if((hoursListPanel.timeList.getItemAt(hoursListPanel.timeList.getSelectedIndex())!=0 || minutesListPanel.timeList.getItemAt(minutesListPanel.timeList.getSelectedIndex())!=0 || secondsListPanel.timeList.getItemAt(secondsListPanel.timeList.getSelectedIndex())!=0))
             {
-                timerThread = TimerTask.createSingleTask(hoursListPanel.timeList.getItemAt(hoursListPanel.timeList.getSelectedIndex()), minutesListPanel.timeList.getItemAt(minutesListPanel.timeList.getSelectedIndex()), secondsListPanel.timeList.getItemAt(secondsListPanel.timeList.getSelectedIndex()), timeLabel);
+                timerThread = TimerTask.createSingleTask(hoursListPanel.timeList.getItemAt(hoursListPanel.timeList.getSelectedIndex()), minutesListPanel.timeList.getItemAt(minutesListPanel.timeList.getSelectedIndex()), secondsListPanel.timeList.getItemAt(secondsListPanel.timeList.getSelectedIndex()), timeLabel, endLabel);
             }
+
+            if (timerThread!=null)
+            {
+                endLabel.setText(TimerState.RUNNING.stateDescrition);
+            }
+
+            TimerTask.isWaiting = false;
         });
 
         JButton stopButton = new JButton("Stop");
-        stopButton.setBackground(new Color(255, 154, 154));
+        stopButton.setBackground(new Color(255, 255, 137));
+        stopButton.addActionListener((event)->
+        {
+            if(timerThread!=null && timerThread.isAlive())
+            {
+                TimerTask.isWaiting = true;
+                endLabel.setText(TimerState.STOPPED.stateDescrition);
+            }
+        });
 
-        stopButton.addActionListener((e)->
+        JButton resetButton = new JButton("Reset");
+        resetButton.setBackground(new Color(255, 154, 154));
+        resetButton.addActionListener((event)->
         {
             if(timerThread!=null)
             {
+                TimerTask.isWaiting = false;
                 timerThread.interrupt();
+                endLabel.setText("");
             }
         });
 
@@ -78,15 +97,16 @@ public class TimerWindow extends JFrame
 
         buttonPanel.add(startButton);
         buttonPanel.add(stopButton);
+        buttonPanel.add(resetButton);
 
         JPanel mainPanel2 = new JPanel();
         mainPanel2.setLayout(new FlowLayout());
-
         mainPanel2.add(timeLabel);
         mainPanel2.add(buttonPanel);
+        mainPanel2.add(endLabel);
 
         super.add(mainPanel1, BorderLayout.PAGE_START);
-        super.add(mainPanel2, BorderLayout.PAGE_END);
+        super.add(mainPanel2, BorderLayout.CENTER);
 
         super.pack();
    }
