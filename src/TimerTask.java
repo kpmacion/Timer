@@ -60,7 +60,7 @@ public class TimerTask implements Runnable
                     {
                         timerThread = null;
                         timeLabel.setText("00:00:00");
-                        endLabel.setText(TimerState.FINISH.stateDescrition);
+                        endLabel.setText(TimerState.FINISH.stateDescription);
                         Thread.currentThread().interrupt();
                     }
                     secondsCounter--;

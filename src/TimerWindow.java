@@ -67,7 +67,7 @@ public class TimerWindow extends JFrame
 
             if (timerThread!=null)
             {
-                endLabel.setText(TimerState.RUNNING.stateDescrition);
+                endLabel.setText(TimerState.RUNNING.stateDescription);
             }
 
             TimerTask.isWaiting = false;
@@ -80,7 +80,7 @@ public class TimerWindow extends JFrame
             if(timerThread!=null && timerThread.isAlive())
             {
                 TimerTask.isWaiting = true;
-                endLabel.setText(TimerState.STOPPED.stateDescrition);
+                endLabel.setText(TimerState.STOPPED.stateDescription);
             }
         });
 

@@ -4,10 +4,10 @@ public enum TimerState
     FINISH("END OF COUNTDOWN"),
     STOPPED("STOPPED");
 
-    String stateDescrition;
+    String stateDescription;
 
-    TimerState(String stateDescrition)
+    TimerState(String stateDescription)
     {
-        this.stateDescrition = stateDescrition;
+        this.stateDescription = stateDescription;
     }
 }
